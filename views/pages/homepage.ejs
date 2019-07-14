@@ -334,7 +334,8 @@ For more information, see:
 <script type="text/javascript">
 
   function callthreesecs() {
-    setInterval(invoker, 3000);
+    var seconds = document.getElementById("seconds").value;
+    setInterval(invoker, seconds * 1000);
   }
   function invoker() {
     var d = new Date();
@@ -354,8 +355,8 @@ For more information, see:
         var webServiceExeDelay = JSON.parse(xhr.responseText).TSwsStart - JSON.parse(xhr.responseText).TSwsEnd;
         var netDelay = total - webServiceExeDelay;
         var output_1 = 'TSreq: ' + start + 'ms, TSresp: ' + end + 'ms, The Total Delay(Execution and transit): ' + total + 'ms';
-        var output_2 = 'TSwsStart' + JSON.parse(xhr.responseText).TSwsStart + 'TSwsEnd' + JSON.parse(xhr.responseText).TSwsEnd + 'Web Service execution delay:' + webServiceExeDelay + 'ms';
-        var output_3 = 'Web Service network transit delay: '+ netDelay + 'ms';
+        var output_2 = 'TSwsStart:' + JSON.parse(xhr.responseText).TSwsStart +'ms, '+ 'TSwsEnd:' + JSON.parse(xhr.responseText).TSwsEnd +'ms, ' + 'Web Service execution delay:' + webServiceExeDelay + 'ms';
+        var output_3 = 'Web Service network transit delay: ' + netDelay + 'ms';
         document.getElementById('output-1').innerHTML = document.getElementById('output-1').innerHTML + output_1 + "<br/>";
         document.getElementById('output-2').innerHTML = document.getElementById('output-2').innerHTML + output_2 + "<br/>";
         document.getElementById('output-3').innerHTML = document.getElementById('output-3').innerHTML + output_3 + "<br/>";
@@ -374,15 +375,16 @@ For more information, see:
   <div class="main container clearfix center">
 
     <div class="links ">
-      <div class="link-list">
-        <h4>Duration</h4><br />
-        <div>
+      <div style="text-align: center;">
+        Duration:<input type="text" id="seconds" name="seconds"><br />
 
+        <div>
           <div style="text-align: center;">
-            <button class="btn btn-primary center" onclick="callthreesecs()">Call every 3 secs</button>
+            <br><button class="btn btn-primary center" onclick="callthreesecs()">Call every given secs</button></br>
           </div>
-          <br>
         </div>
+          <br>
+
         <br>
         <div id="output-1"></div>
         <div id="output-2"></div>
