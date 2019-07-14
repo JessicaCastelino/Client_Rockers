@@ -334,18 +334,30 @@ For more information, see:
 <script type="text/javascript">
 
   function callthreesecs() {
+    var startTime = new Date().getTime();
     var seconds = document.getElementById("seconds").value;
-    setInterval(invoker, seconds * 1000);
+    var timeSuspend = document.getElementById("time").value;
+    console.log('duration:'+seconds+'suspend time'+timeSuspend);
+    //setInterval(invoker, seconds * 1000);
+    var interval = setInterval(function (){
+      if (new Date().getTime() - startTime >= timeSuspend*1000) {
+        clearInterval(interval);
+        return;
+      }
+      invoker();
+    }, seconds*1000);
   }
+
   function invoker() {
     var d = new Date();
     var start = d.getTime();
+    console.log('time' + start);
     var xhr = new XMLHttpRequest(),
       method = "POST",
       url = "http://localhost:1337/process";
 
-    let params = JSON.stringify({ start });
-    //console.log(params);
+    let params = JSON.stringify({ "seconds": 5 });
+    console.log(params);
     xhr.open(method, url, true);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4 && xhr.status === 200) {
@@ -355,11 +367,17 @@ For more information, see:
         var webServiceExeDelay = JSON.parse(xhr.responseText).TSwsStart - JSON.parse(xhr.responseText).TSwsEnd;
         var netDelay = total - webServiceExeDelay;
         var output_1 = 'TSreq: ' + start + 'ms, TSresp: ' + end + 'ms, The Total Delay(Execution and transit): ' + total + 'ms';
-        var output_2 = 'TSwsStart:' + JSON.parse(xhr.responseText).TSwsStart +'ms, '+ 'TSwsEnd:' + JSON.parse(xhr.responseText).TSwsEnd +'ms, ' + 'Web Service execution delay:' + webServiceExeDelay + 'ms';
+        var output_2 = 'TSwsStart:' + JSON.parse(xhr.responseText).TSwsStart + 'ms, ' + 'TSwsEnd:' + JSON.parse(xhr.responseText).TSwsEnd + 'ms, ' + 'Web Service execution delay:' + webServiceExeDelay + 'ms';
         var output_3 = 'Web Service network transit delay: ' + netDelay + 'ms';
         document.getElementById('output-1').innerHTML = document.getElementById('output-1').innerHTML + output_1 + "<br/>";
         document.getElementById('output-2').innerHTML = document.getElementById('output-2').innerHTML + output_2 + "<br/>";
         document.getElementById('output-3').innerHTML = document.getElementById('output-3').innerHTML + output_3 + "<br/>";
+
+        // var fso = new ActiveXObject("Scripting.FileSystemObject");
+        // var a = fso.CreateTextFile("c:\\testfile.txt", true);
+        // a.WriteLine("This is a test.");
+        // a.Close();
+
       }
 
     };
@@ -376,14 +394,14 @@ For more information, see:
 
     <div class="links ">
       <div style="text-align: center;">
-        Duration:<input type="text" id="seconds" name="seconds"><br />
-
+        Duration:<input type="text" id="seconds" name="seconds">seconds<br />
+        Terminate Web service in :<input type="text" id="time" name="time">seconds<br />
         <div>
           <div style="text-align: center;">
             <br><button class="btn btn-primary center" onclick="callthreesecs()">Call every given secs</button></br>
           </div>
         </div>
-          <br>
+        <br>
 
         <br>
         <div id="output-1"></div>
