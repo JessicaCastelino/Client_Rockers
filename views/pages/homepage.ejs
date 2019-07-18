@@ -281,7 +281,6 @@ For more information, see:
   }
 
   div.links {
-    width: 900px;
     margin-left: auto;
     margin-right: auto;
     -moz-box-sizing: border-box;
@@ -331,30 +330,34 @@ For more information, see:
   }, 0);
 </script>
 
-<script type="text/javascript">
 
+<script type="text/javascript">
+  var myTable = "";
+  var i = 0;
+  myTable += "<tr><td>Request ID</td><td>TSreq</td><td>TSresp</td><td>total</td><td>TSwsStart</td><td>TSwsEnd</td><td>Execution delay</td><td>network transit delay</td><td>Server Response</td></tr>";
   function callthreesecs() {
     var startTime = new Date().getTime();
     var seconds = document.getElementById("seconds").value;
     var timeSuspend = document.getElementById("time").value;
-    console.log('duration:'+seconds+'suspend time'+timeSuspend);
     //setInterval(invoker, seconds * 1000);
-    var interval = setInterval(function (){
-      if (new Date().getTime() - startTime >= timeSuspend*1000) {
+    var interval = setInterval(function () {
+      if (new Date().getTime() - startTime >= timeSuspend * 1000) {
         clearInterval(interval);
         return;
       }
-      invoker();
-    }, seconds*1000);
+      i += 1;
+      invoker(i);
+    }, 1000);
   }
 
-  function invoker() {
+  function invoker(i) {
+
     var d = new Date();
     var start = d.getTime();
     console.log('time' + start);
     var xhr = new XMLHttpRequest(),
       method = "POST",
-      url = "http://localhost:1337/process";
+      url = "http://rockersbackup.southeastasia.cloudapp.azure.com/process";
 
     let params = JSON.stringify({ "seconds": 5 });
     console.log(params);
@@ -364,20 +367,34 @@ For more information, see:
         var nd = new Date();
         var end = nd.getTime();
         var total = end - start;
-        var webServiceExeDelay = JSON.parse(xhr.responseText).TSwsStart - JSON.parse(xhr.responseText).TSwsEnd;
+
+        var TSwsStart = JSON.parse(xhr.responseText).TSwsStart;
+        var newdate = new Date(TSwsStart * 1000);
+        var hours = newdate.getHours();
+        var min = "0" + newdate.getMinutes();
+        var sec = "0" + newdate.getSeconds();
+        var formattedTime_TSwsStart =  hours + ':' + min.substr(-2) + ':' + sec.substr(-2);
+        console.log("Changes date formate using Date:" + formattedTime_TSwsStart);
+        var TSwsEnd = JSON.parse(xhr.responseText).TSwsEnd;
+        var webServiceExeDelay = TSwsEnd - TSwsStart;
         var netDelay = total - webServiceExeDelay;
-        var output_1 = 'TSreq: ' + start + 'ms, TSresp: ' + end + 'ms, The Total Delay(Execution and transit): ' + total + 'ms';
-        var output_2 = 'TSwsStart:' + JSON.parse(xhr.responseText).TSwsStart + 'ms, ' + 'TSwsEnd:' + JSON.parse(xhr.responseText).TSwsEnd + 'ms, ' + 'Web Service execution delay:' + webServiceExeDelay + 'ms';
-        var output_3 = 'Web Service network transit delay: ' + netDelay + 'ms';
-        document.getElementById('output-1').innerHTML = document.getElementById('output-1').innerHTML + output_1 + "<br/>";
-        document.getElementById('output-2').innerHTML = document.getElementById('output-2').innerHTML + output_2 + "<br/>";
-        document.getElementById('output-3').innerHTML = document.getElementById('output-3').innerHTML + output_3 + "<br/>";
+        // var output_1 = 'TSreq: ' + start + 'ms, TSresp: ' + end + 'ms, The Total Delay(Execution and transit): ' + total + 'ms';
+        // var output_2 = 'TSwsStart:' + JSON.parse(xhr.responseText).TSwsStart + 'ms, ' + 'TSwsEnd:' + JSON.parse(xhr.responseText).TSwsEnd + 'ms, ' + 'Web Service execution delay:' + webServiceExeDelay + 'ms';
+        // var output_3 = 'Web Service network transit delay: ' + netDelay + 'ms';
+        //document.getElementById('output-1').innerHTML = document.getElementById('output-1').innerHTML + output_1 + "<br/>";
+        //document.getElementById('output-2').innerHTML = document.getElementById('output-2').innerHTML + output_2 + "<br/>";
+        //document.getElementById('output-3').innerHTML = document.getElementById('output-3').innerHTML + output_3 + "<br/>";
 
-        // var fso = new ActiveXObject("Scripting.FileSystemObject");
-        // var a = fso.CreateTextFile("c:\\testfile.txt", true);
-        // a.WriteLine("This is a test.");
-        // a.Close();
+        // var rows = "";
+        // rows += "<tr><td>" + start + "</td><td>" + end + "</td><td>" + total + "</td></tr>";
+        // $(rows).appendTo("#requestTable tbody");
 
+        // var row = document.getElementsByTagName("tr")[0];
+        // var x = row.insertCell(-1);
+        // x.innerHTML = start;
+
+        myTable += "<tr><td>" + i + "</td><td>" + start + "</td><td>" + end + "</td><td>" + total + "</td><td>" + JSON.parse(xhr.responseText).TSwsStart + "</td><td>" + JSON.parse(xhr.responseText).TSwsEnd + "</td><td>" + webServiceExeDelay + "</td><td>" + netDelay + "</td><td>"+JSON.parse(xhr.responseText).arguments[3]+"</td></tr>";
+        document.getElementById('requestTable').innerHTML = myTable;
       }
 
     };
@@ -404,9 +421,13 @@ For more information, see:
         <br>
 
         <br>
-        <div id="output-1"></div>
-        <div id="output-2"></div>
-        <div id="output-3"></div>
+        <div class="container-fluid table-responsive">
+          <table class="table table-dark table-striped" id="requestTable">
+            <thead class="thead-dark">
+
+            </thead>
+          </table>
+        </div>
       </div>
     </div>
   </div>
