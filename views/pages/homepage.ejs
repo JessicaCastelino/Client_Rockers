@@ -8,6 +8,7 @@ For more information, see:
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" />
 
+
 <style>
   /* Styles included inline since you'll probably be deleting this page anyway */
   .center-div {
@@ -324,12 +325,13 @@ For more information, see:
     display: none;
   }
 </style>
+
+
 <script type="text/javascript">
   setTimeout(function sunrise() {
     document.getElementsByClassName('header')[0].style.backgroundColor = '#118798';
   }, 0);
 </script>
-
 
 <script type="text/javascript">
   var myTable = "";
@@ -348,13 +350,13 @@ For more information, see:
       i += 1;
       invoker(i);
     }, 1000);
-  }
+  };
+
+
 
   function invoker(i) {
 
-    var d = new Date();
-    var start = d.getTime();
-    console.log('time' + start);
+    var start = moment();
     var xhr = new XMLHttpRequest(),
       method = "POST",
       url = "http://rockersbackup.southeastasia.cloudapp.azure.com/process";
@@ -364,43 +366,47 @@ For more information, see:
     xhr.open(method, url, true);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        var nd = new Date();
-        var end = nd.getTime();
-        var total = end - start;
 
-        var TSwsStart = JSON.parse(xhr.responseText).TSwsStart;
-        var newdate = new Date(TSwsStart * 1000);
-        var hours = newdate.getHours();
-        var min = "0" + newdate.getMinutes();
-        var sec = "0" + newdate.getSeconds();
-        var formattedTime_TSwsStart =  hours + ':' + min.substr(-2) + ':' + sec.substr(-2);
-        console.log("Changes date formate using Date:" + formattedTime_TSwsStart);
-        var TSwsEnd = JSON.parse(xhr.responseText).TSwsEnd;
-        var webServiceExeDelay = TSwsEnd - TSwsStart;
+        var end = moment();
+
+        var TSwsStart = parseInt(JSON.parse(xhr.responseText).TSwsStart, 13);
+        var TSwsEnd = parseInt(JSON.parse(xhr.responseText).TSwsEnd, 13);
+
+        var total = findDiff(end, start);
+        var webServiceExeDelay = findDiff(TSwsEnd, TSwsStart);
         var netDelay = total - webServiceExeDelay;
-        // var output_1 = 'TSreq: ' + start + 'ms, TSresp: ' + end + 'ms, The Total Delay(Execution and transit): ' + total + 'ms';
-        // var output_2 = 'TSwsStart:' + JSON.parse(xhr.responseText).TSwsStart + 'ms, ' + 'TSwsEnd:' + JSON.parse(xhr.responseText).TSwsEnd + 'ms, ' + 'Web Service execution delay:' + webServiceExeDelay + 'ms';
-        // var output_3 = 'Web Service network transit delay: ' + netDelay + 'ms';
-        //document.getElementById('output-1').innerHTML = document.getElementById('output-1').innerHTML + output_1 + "<br/>";
-        //document.getElementById('output-2').innerHTML = document.getElementById('output-2').innerHTML + output_2 + "<br/>";
-        //document.getElementById('output-3').innerHTML = document.getElementById('output-3').innerHTML + output_3 + "<br/>";
 
-        // var rows = "";
-        // rows += "<tr><td>" + start + "</td><td>" + end + "</td><td>" + total + "</td></tr>";
-        // $(rows).appendTo("#requestTable tbody");
 
-        // var row = document.getElementsByTagName("tr")[0];
-        // var x = row.insertCell(-1);
-        // x.innerHTML = start;
-
-        myTable += "<tr><td>" + i + "</td><td>" + start + "</td><td>" + end + "</td><td>" + total + "</td><td>" + JSON.parse(xhr.responseText).TSwsStart + "</td><td>" + JSON.parse(xhr.responseText).TSwsEnd + "</td><td>" + webServiceExeDelay + "</td><td>" + netDelay + "</td><td>"+JSON.parse(xhr.responseText).arguments[3]+"</td></tr>";
+        myTable += "<tr><td>" + i + "</td><td>" + timeCheck(start) + "</td><td>" + timeCheck(end) + "</td><td>" + total + "</td><td>" + timeCheck(TSwsStart) + "</td><td>" + timeCheck(TSwsEnd) + "</td><td>" + webServiceExeDelay + "</td><td>" + netDelay + "</td><td>" + JSON.parse(xhr.responseText).arguments[3] + "</td></tr>";
         document.getElementById('requestTable').innerHTML = myTable;
       }
 
     };
     xhr.setRequestHeader('Content-Type', 'application/json')
     xhr.send(params);
+  };
+
+  function findDiff(time1, time2) {
+    var check1 = moment(time1);
+    var check2 = moment(time2);
+    var diff = moment.duration(check1.diff(check2))
+    return diff;
   }
+  function timeCheck(time) {
+    var getTime = moment(time);
+    return getTime.format("h:mm:ss.SSS");
+  };
+  function timee(time) {
+    var newdate = new Date(time);
+    var hours = newdate.getHours();
+    var min = "0" + newdate.getMinutes();
+    var sec = "0" + newdate.getSeconds();
+    var mili = "0" + newdate.getMilliseconds();
+    var formattedTime = min.substr(-2) + ':' + sec.substr(-2) + ":" + mili.substr(-6);
+    //var formattedTime = mili;
+    return formattedTime;
+  };
+
 </script>
 
 <div class="default-page">
